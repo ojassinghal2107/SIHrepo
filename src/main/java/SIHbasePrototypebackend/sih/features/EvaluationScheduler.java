@@ -20,6 +20,7 @@ public class EvaluationScheduler {
     @Autowired
     private MLService mlService;
 
+
     @Autowired
     private RiskRecordService riskRecordService;
 
@@ -41,9 +42,11 @@ public class EvaluationScheduler {
                 riskRecordService.save(risk);
 
                 // Trigger WhatsApp alert if risk exceeds threshold
-                if (risk.getRiskScore() > 0.75 || "HIGH".equalsIgnoreCase(risk.getRiskLevel())) {
-                    whatsappService.sendAlertToGuardian(student, risk);
-                }
+                if (risk.getRiskScore() > 0.8) {
+                String message = "⚠️ High dropout risk detected for student " + student.getStudentId();
+                whatsappService.sendMessage(student.getGuardianPhone(), message);
+            }
+
             }
         }
 

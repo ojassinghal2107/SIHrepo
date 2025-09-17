@@ -8,7 +8,7 @@ import SIHbasePrototypebackend.sih.model.RiskRecord;
 import java.util.List;
 
 @Repository
-public interface RiskRecordRepository extends JpaRepository<RiskRecord, Long> {
+public interface RiskRecordRepository extends JpaRepository<RiskRecord, String> {
 
     // Get all risk records for a specific student
     List<RiskRecord> findByStudentId(String studentId);

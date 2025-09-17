@@ -1,38 +1,39 @@
 package SIHbasePrototypebackend.sih.services;
-import SIHbasePrototypebackend.sih.model.*;
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
+import org.springframework.http.HttpHeaders;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+
 
 @Service
 public class WhatsAppService {
 
-    @Value("${twilio.accountSid}")
-    private String accountSid;
+    @Value("${whatsapp.api.url}")
+    private String apiUrl;
 
-    @Value("${twilio.authToken}")
-    private String authToken;
+    @Value("${whatsapp.token}")
+    private String token;
 
-    @Value("${twilio.whatsappFrom}")
-    private String fromNumber; // e.g. "whatsapp:+14155238886"
+    public void sendMessage(String recipient, String message) {
+        RestTemplate restTemplate = new RestTemplate();
 
-    public void sendAlertToGuardian(Student student, RiskRecord riskRecord) {
-        Twilio.init(accountSid, authToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String guardianNumber = "whatsapp:" + student.getGuardianPhone(); // e.g. "+91XXXXXXXXXX"
-        String message = String.format(
-            "⚠️ Alert: Your ward %s has a dropout risk level of %s (%.2f).\nPlease consult the mentor immediately.",
-            student.getStudentId(), riskRecord.getRiskLevel(), riskRecord.getRiskScore()
-        );
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("messaging_product", "whatsapp");
+        payload.put("to", recipient);
+        payload.put("type", "text");
+        payload.put("text", Map.of("body", message));
 
-        Message.creator(
-            new PhoneNumber(guardianNumber),
-            new PhoneNumber(fromNumber),
-            message
-        ).create();
-
-        System.out.println("📤 WhatsApp alert sent to guardian of " + student.getStudentId());
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+        restTemplate.postForEntity(apiUrl, request, String.class);
     }
 }

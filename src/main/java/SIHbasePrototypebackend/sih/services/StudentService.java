@@ -19,6 +19,13 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
+    // Save a single student
+    public void saveStudent(Student student) {
+    studentRepository.save(student);
+}
+
+    
+
     // Save a batch of students
     public void saveAll(List<Student> students) {
         studentRepository.saveAll(students);

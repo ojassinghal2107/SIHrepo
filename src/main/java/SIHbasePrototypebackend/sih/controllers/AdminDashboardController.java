@@ -24,6 +24,32 @@ public class AdminDashboardController {
     @Autowired
     private RiskRecordService riskRecordService;
 
+    @PostMapping("/ingest-students")
+    public ResponseEntity<?> receiveBatch(@RequestBody List<Student> students) {
+    studentService.saveAll(students);
+    return ResponseEntity.ok(Map.of("status", "batch saved", "count", students.size()));
+}
+    @PostMapping("/ingest-student")
+public ResponseEntity<?> receiveStudent(@RequestBody Map<String, Object> payload) {
+    Student student = new Student();
+
+    student.setStudentId((String) payload.get("studentId"));
+    student.setAttendance((Integer) payload.get("attendance"));
+    student.setFeePaid((Boolean) payload.get("feePaid"));
+    student.setScore1((Integer) payload.get("score1"));
+    student.setScore2((Integer) payload.get("score2"));
+    student.setScore3((Integer) payload.get("score3"));
+    student.setAttempts((Integer) payload.get("attempts"));
+    student.setGuardianPhone((String) payload.get("phoneNumber"));
+
+    Map<String, Object> dynamic = new HashMap<>(payload);
+    dynamic.keySet().removeAll(List.of("studentId", "attendance", "feePaid", "score1", "score2", "score3", "attempts", "phoneNumber"));
+    student.setDynamicPayload(dynamic);
+
+    studentService.saveStudent(student);
+    return ResponseEntity.ok(Map.of("status", "saved"));
+}
+
     // 1. Get all students
     @GetMapping("/students")
     public ResponseEntity<List<Student>> getAllStudents() {

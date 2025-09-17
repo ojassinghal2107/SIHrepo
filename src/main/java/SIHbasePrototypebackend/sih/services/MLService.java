@@ -24,6 +24,7 @@ public class MLService {
 
     // Evaluate a single student
     public RiskRecord evaluate(Student student) {
+        
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

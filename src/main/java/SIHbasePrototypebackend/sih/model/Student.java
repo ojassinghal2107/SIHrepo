@@ -2,7 +2,9 @@ package SIHbasePrototypebackend.sih.model;
 
 
 import java.util.Arrays;
+import java.util.Map;
 
+import SIHbasePrototypebackend.sih.features.JsonMapConverter;
 import jakarta.persistence.*;
 
 
@@ -21,6 +23,10 @@ public class Student {
     private int score1;
     private int score2;
     private int score3;
+
+    @Convert(converter = JsonMapConverter.class)
+    @Column(columnDefinition = "JSON")
+    private Map<String, Object> dynamicPayload;
 
     private int attempts;
 
@@ -66,6 +72,9 @@ public class Student {
     public int getScore1() {
         return score1;
     }
+    public Map<String, Object> getDynamicPayload() {
+    return dynamicPayload;
+}
     public void setGuardianPhone(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
@@ -73,6 +82,9 @@ public class Student {
     public void setScore1(int score1) {
         this.score1 = score1;
     }
+    public void setDynamicPayload(Map<String, Object> dynamicPayload) {
+    this.dynamicPayload = dynamicPayload;
+}   
 
     public int getScore2() {
         return score2;
@@ -107,13 +119,14 @@ public class Student {
     }
 
     @Override
-    public String toString() {
-        return "Student{" +
-                "studentId='" + studentId + '\'' +
-                ", attendance=" + attendance +
-                ", feePaid=" + feePaid +
-                ", scores=" + Arrays.toString(getScoreArray()) +
-                ", attempts=" + attempts +
-                '}';
-    }
+public String toString() {
+    return "Student{" +
+            "studentId='" + studentId + '\'' +
+            ", attendance=" + attendance +
+            ", feePaid=" + feePaid +
+            ", scores=" + Arrays.toString(getScoreArray()) +
+            ", attempts=" + attempts +
+            ", dynamicPayload=" + dynamicPayload +
+            '}';
+}
 }

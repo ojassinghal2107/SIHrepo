@@ -1,45 +1,39 @@
 package SIHbasePrototypebackend.sih.securityconfig;
 
-
-
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.SignatureAlgorithm;
-
+import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.crypto.SecretKey;
+
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "your_secret_key_here"; // Replace with env var in production
+    private final String SECRET_KEY = "your_very_long_secret_key_which_should_be_at_least_256_bits"; // Use env var in prod
     private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
 
-    // Generate token with roles
-    public String generateToken(String username, List<String> roles) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", roles);
+    private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
+    public String generateToken(String username, List<String> roles) {
         return Jwts.builder()
-            .setClaims(claims)
-            .setSubject(username)
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .subject(username)
+            .claim("roles", roles)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
+            .signWith(key) // ✅ MacAlgorithm, not SignatureAlgorithm
             .compact();
     }
 
-    // Extract username from token
     public String extractUsername(String token) {
-        return getClaims(token).getSubject();
+        return ((Claims) getClaims(token).getPayload()).getSubject(); // ✅ getPayload().getSubject()
     }
 
-    // Extract roles from token
     public List<String> extractRoles(String token) {
-        Object roles = getClaims(token).get("roles");
+        Object roles = getClaims(token).getPayload().get("roles");
         if (roles instanceof List<?>) {
             return ((List<?>) roles).stream()
                 .map(Object::toString)
@@ -48,21 +42,15 @@ public class JwtUtil {
         return List.of();
     }
 
-    // Validate token
     public boolean validateToken(String token, String username) {
-        return extractUsername(token).equals(username) && !isTokenExpired(token);
+        return extractUsername(token).equals(username);
     }
 
-    // Check expiration
-    private boolean isTokenExpired(String token) {
-        return getClaims(token).getExpiration().before(new Date());
-    }
 
-    // Get claims from token
-    private Claims getClaims(String token) {
+    private Jws<Claims> getClaims(String token) {
         return Jwts.parser()
-            .setSigningKey(SECRET_KEY)
-            .parseClaimsJws(token)
-            .getBody();
+            .verifyWith((key) ) // ✅ Cast to SecretKey
+            .build()
+            .parseSignedClaims(token); // ✅ New method in 0.12.x
     }
 }

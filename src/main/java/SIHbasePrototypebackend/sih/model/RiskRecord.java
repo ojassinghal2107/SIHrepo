@@ -7,17 +7,21 @@ import java.time.LocalDateTime;
 @Table(name = "risk_records")
 public class RiskRecord {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String studentId;
+@Id
+private String studentId;
 
-    private String riskLevel; // e.g., "Low", "Medium", "High"
+@Column(nullable = false)
+private String riskLevel;
 
-    private double riskScore; // e.g., 0.82
+@Column(nullable = false)
+private double riskScore;
 
+
+    @Column(nullable = false, updatable = false)
+    @org.hibernate.annotations.CreationTimestamp
     private LocalDateTime timestamp;
+
 
     public RiskRecord() {}
 
@@ -29,10 +33,7 @@ public class RiskRecord {
     }
 
     // Getters and setters
-
-    public Long getId() {
-        return id;
-    }
+    
 
     public String getStudentId() {
         return studentId;
